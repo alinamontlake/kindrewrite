@@ -235,17 +235,15 @@ function wrapShort(text) {
   return "Quick note: " + firstSentence.trim() + " Let's discuss.";
 }
 
-// Start server (only in local development)
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, () => {
-    console.log(`KindRewrite server running on http://localhost:${PORT}`);
-    console.log(`HF_TOKEN configured: ${process.env.HF_TOKEN ? 'Yes ✓' : 'No ✗'}`);
-    
-    if (!process.env.HF_TOKEN) {
-      console.warn('⚠️  WARNING: HF_TOKEN not set. Please create a .env file with your Hugging Face token.');
-    }
-  });
-}
+// Start server
+app.listen(PORT, () => {
+  console.log(`KindRewrite server running on http://localhost:${PORT}`);
+  console.log(`HF_TOKEN configured: ${process.env.HF_TOKEN ? 'Yes ✓' : 'No ✗'}`);
+  
+  if (!process.env.HF_TOKEN) {
+    console.warn('⚠️  WARNING: HF_TOKEN not set. Please create a .env file with your Hugging Face token.');
+  }
+});
 
 // Export for Vercel serverless
 export default app;
