@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KindRewrite - Message Coach</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 700px;
+      width: 100%;
+      padding: 40px;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 2rem;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 0.95rem;
+    }
+
+    label {
+      display: block;
+      color: #333;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: inherit;
+      resize: vertical;
+      transition: border-color 0.2s;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .button-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 15px;
+      width: 100%;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .button-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .button-primary:active {
+      transform: translateY(0);
+    }
+
+    .button-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .result-section {
+      margin-top: 30px;
+      padding-top: 30px;
+      border-top: 2px solid #f0f0f0;
+      display: none;
+    }
+
+    .result-section.visible {
+      display: block;
+    }
+
+    .score-display {
+      background: #f8f9ff;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .score-number {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #667eea;
+      margin-bottom: 5px;
+    }
+
+    .verdict {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+
+    .verdict.ok {
+      color: #10b981;
+    }
+
+    .verdict.warning {
+      color: #f59e0b;
+    }
+
+    .rewrite-options {
+      margin-top: 20px;
+      display: none;
+    }
+
+    .rewrite-options.visible {
+      display: block;
+    }
+
+    .rewrite-options h3 {
+      color: #333;
+      margin-bottom: 15px;
+      font-size: 1.1rem;
+    }
+
+    .tone-buttons {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .button-tone {
+      background: white;
+      border: 2px solid #667eea;
+      color: #667eea;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .button-tone:hover {
+      background: #667eea;
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .button-tone:active {
+      transform: translateY(0);
+    }
+
+    .button-tone:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .rewrite-output {
+      display: none;
+      margin-top: 20px;
+    }
+
+    .rewrite-output.visible {
+      display: block;
+    }
+
+    .rewrite-box {
+      background: #f8f9ff;
+      padding: 16px;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+      margin-bottom: 10px;
+      line-height: 1.6;
+      color: #333;
+    }
+
+    .button-copy {
+      background: #10b981;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .button-copy:hover {
+      background: #059669;
+      transform: translateY(-1px);
+    }
+
+    .button-copy.copied {
+      background: #6b7280;
+    }
+
+    .error-message {
+      background: #fee2e2;
+      color: #991b1b;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 15px;
+      display: none;
+    }
+
+    .error-message.visible {
+      display: block;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .info-box {
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      padding: 12px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      color: #1e40af;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>✨ KindRewrite</h1>
+    <p class="subtitle">Transform your messages into kinder, more constructive communication</p>
+
+    <div class="info-box">
+      💡 This tool uses AI-powered moderation as a <strong>coaching feature</strong> to help you communicate more effectively, not to censor you.
+    </div>
+
+    <div>
+      <label for="messageInput">Your message:</label>
+      <textarea 
+        id="messageInput" 
+        placeholder="Paste the message you want to send (email, Slack, etc.)..."
+        maxlength="5000"
+      ></textarea>
+      
+      <button class="button-primary" id="checkBtn">
+        Check Message
+      </button>
+    </div>
+
+    <div class="error-message" id="errorMessage"></div>
+
+    <div class="result-section" id="resultSection">
+      <div class="score-display">
+        <div>Toxicity Score</div>
+        <div class="score-number" id="scoreNumber">-</div>
+        <div class="verdict" id="verdict"></div>
+      </div>
+
+      <div class="rewrite-options" id="rewriteOptions">
+        <h3>💡 Try rewriting your message with one of these tones:</h3>
+        <div class="tone-buttons">
+          <button class="button-tone" data-tone="professional">Professional</button>
+          <button class="button-tone" data-tone="calm">Calm</button>
+          <button class="button-tone" data-tone="friendly">Friendly</button>
+          <button class="button-tone" data-tone="short">Very Short</button>
+        </div>
+
+        <div class="rewrite-output" id="rewriteOutput">
+          <h3>Rewritten version:</h3>
+          <div class="rewrite-box" id="rewriteBox"></div>
+          <button class="button-copy" id="copyBtn">Copy to Clipboard</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // DOM elements
+    const messageInput = document.getElementById('messageInput');
+    const checkBtn = document.getElementById('checkBtn');
+    const resultSection = document.getElementById('resultSection');
+    const scoreNumber = document.getElementById('scoreNumber');
+    const verdict = document.getElementById('verdict');
+    const rewriteOptions = document.getElementById('rewriteOptions');
+    const toneButtons = document.querySelectorAll('.button-tone');
+    const rewriteOutput = document.getElementById('rewriteOutput');
+    const rewriteBox = document.getElementById('rewriteBox');
+    const copyBtn = document.getElementById('copyBtn');
+    const errorMessage = document.getElementById('errorMessage');
+
+    let currentText = '';
+    let currentRewrite = '';
+
+    // Check message for toxicity
+    checkBtn.addEventListener('click', async () => {
+      const text = messageInput.value.trim();
+      
+      if (!text) {
+        showError('Please enter a message to check.');
+        return;
+      }
+
+      currentText = text;
+      hideError();
+      setLoading(checkBtn, true);
+      resultSection.classList.remove('visible');
+      rewriteOptions.classList.remove('visible');
+      rewriteOutput.classList.remove('visible');
+
+      try {
+        const response = await fetch('/api/moderate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to check message');
+        }
+
+        // Display results
+        displayScore(data.scorePct);
+        resultSection.classList.add('visible');
+
+      } catch (error) {
+        showError(error.message);
+      } finally {
+        setLoading(checkBtn, false);
+      }
+    });
+
+    // Display toxicity score and verdict
+    function displayScore(score) {
+      scoreNumber.textContent = `${score}%`;
+      
+      if (score < 50) {
+        verdict.textContent = 'Looks OK ✅';
+        verdict.className = 'verdict ok';
+        rewriteOptions.classList.remove('visible');
+      } else {
+        verdict.textContent = 'Needs rewrite ⚠️';
+        verdict.className = 'verdict warning';
+        rewriteOptions.classList.add('visible');
+      }
+    }
+
+    // Handle tone button clicks
+    toneButtons.forEach(button => {
+      button.addEventListener('click', async () => {
+        const tone = button.dataset.tone;
+        
+        rewriteOutput.classList.remove('visible');
+        setToneButtonsLoading(true);
+
+        try {
+          const response = await fetch('/api/rewrite', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: currentText, tone })
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || 'Failed to rewrite message');
+          }
+
+          // Display rewritten text
+          currentRewrite = data.rewritten;
+          rewriteBox.textContent = currentRewrite;
+          rewriteOutput.classList.add('visible');
+          copyBtn.textContent = 'Copy to Clipboard';
+          copyBtn.classList.remove('copied');
+
+        } catch (error) {
+          showError(error.message);
+        } finally {
+          setToneButtonsLoading(false);
+        }
+      });
+    });
+
+    // Copy to clipboard
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(currentRewrite);
+        copyBtn.textContent = '✓ Copied!';
+        copyBtn.classList.add('copied');
+        
+        setTimeout(() => {
+          copyBtn.textContent = 'Copy to Clipboard';
+          copyBtn.classList.remove('copied');
+        }, 2000);
+      } catch (error) {
+        showError('Failed to copy to clipboard');
+      }
+    });
+
+    // Utility functions
+    function setLoading(button, isLoading) {
+      if (isLoading) {
+        button.disabled = true;
+        button.innerHTML = '<span class="loading"></span>Analyzing...';
+      } else {
+        button.disabled = false;
+        button.textContent = 'Check Message';
+      }
+    }
+
+    function setToneButtonsLoading(isLoading) {
+      toneButtons.forEach(button => {
+        button.disabled = isLoading;
+      });
+    }
+
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.classList.add('visible');
+    }
+
+    function hideError() {
+      errorMessage.classList.remove('visible');
+    }
+  </script>
+</body>
+</html>
